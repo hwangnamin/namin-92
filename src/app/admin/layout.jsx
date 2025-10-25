@@ -1,12 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import Form from "next/form";
 import {
   Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -19,6 +25,8 @@ import {
   HomeIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
+
+import { supabase } from "@/utils/supabaseClient";
 
 const navigation = [
   { name: "Dashboard", href: "#", icon: HomeIcon, count: "5", current: true },
@@ -51,15 +59,39 @@ function classNames(...classes) {
 }
 
 export default function AdminLayout({ children }) {
-  const [date, setDate] = useState(dayjs());
   const [open, setOpen] = useState(false);
+
+  const [date, setDate] = useState(dayjs());
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [type, setType] = useState("wine");
+  const [matching, setMatching] = useState(1);
 
   const handleClickOpen = () => {
     setOpen(true);
   };
 
   const handleClose = () => {
+    setName("");
+    setPassword("");
+    setType("wine");
+    setMatching(1);
+
     setOpen(false);
+  };
+
+  const handleAddMeeting = async () => {
+    const { error } = await supabase
+      .from("meeting")
+      .insert({ date, name, password, type, matching });
+
+    if (error && error.code === "23505") {
+      alert("해당 날짜에 같은 이름의 모임이 존재합니다.");
+
+      return;
+    }
+
+    handleClose();
   };
 
   return (
@@ -156,7 +188,51 @@ export default function AdminLayout({ children }) {
       <Dialog open={open}>
         <DialogTitle>미팅 만들기</DialogTitle>
         <DialogContent>
-          <form id="add-meeting"></form>
+          <Form
+            id="add-meeting"
+            className="flex flex-col gap-4 p-2"
+            action={handleAddMeeting}
+          >
+            <TextField
+              label="모임 이름"
+              value={name}
+              onChange={({ target }) => setName(target.value)}
+              required
+            />
+            <TextField
+              label="비밀번호"
+              value={password}
+              onChange={({ target }) => setPassword(target.value)}
+              required
+            />
+            <FormControl>
+              <InputLabel id="type">타입</InputLabel>
+              <Select
+                labelId="type"
+                label="타입"
+                value={type}
+                onChange={({ target }) => setType(target.value)}
+              >
+                <MenuItem value="wine">와인</MenuItem>
+                <MenuItem value="coffee">커피</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl>
+              <InputLabel id="matching">매칭 개수</InputLabel>
+              <Select
+                labelId="matching"
+                label="매칭 개수"
+                value={matching}
+                onChange={({ target }) => setMatching(target.value)}
+              >
+                <MenuItem value={1}>1명</MenuItem>
+                <MenuItem value={2}>2명</MenuItem>
+                <MenuItem value={3}>3명</MenuItem>
+                <MenuItem value={4}>4명</MenuItem>
+                <MenuItem value={5}>5명</MenuItem>
+              </Select>
+            </FormControl>
+          </Form>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>취소</Button>
