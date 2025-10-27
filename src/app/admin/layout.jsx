@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import Form from "next/form";
+import { useSearchParams } from "next/navigation";
 import {
   Button,
   Dialog,
@@ -26,7 +28,12 @@ function classNames(...classes) {
 }
 
 export default function AdminLayout({ children }) {
+  const searchParams = useSearchParams();
+
   const [navigation, setNavagation] = useState([]);
+  const [selected, setSelected] = useState(
+    searchParams.get("date") + searchParams.get("name")
+  );
   const [open, setOpen] = useState(false);
 
   const [date, setDate] = useState(dayjs());
@@ -52,12 +59,18 @@ export default function AdminLayout({ children }) {
     const { data, error } = await supabase
       .from("meeting")
       .select("*")
-      .eq("date", date);
+      .eq("date", date)
+      .order("created_at");
 
     data &&
       setNavagation(
         data.map((row) => {
-          return { ...row, href: "#", icon: UsersIcon, current: false };
+          return {
+            ...row,
+            href: `admin/?date=${row.date}&name=${row.name}`,
+            icon: UsersIcon,
+            current: row.date + row.name === selected,
+          };
         })
       );
 
@@ -89,12 +102,18 @@ export default function AdminLayout({ children }) {
       const { data, error } = await supabase
         .from("meeting")
         .select("*")
-        .eq("date", date);
+        .eq("date", date)
+        .order("created_at");
 
       data &&
         setNavagation(
           data.map((row) => {
-            return { ...row, href: "#", icon: UsersIcon, current: false };
+            return {
+              ...row,
+              href: `admin/?date=${row.date}&name=${row.name}`,
+              icon: UsersIcon,
+              current: row.date + row.name === selected,
+            };
           })
         );
 
@@ -102,11 +121,11 @@ export default function AdminLayout({ children }) {
     };
 
     handleReadMeeting();
-  }, [date]);
+  }, [date, selected]);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <div className="flex gap-4">
+      <div className="flex">
         <div className="relative flex grow flex-col gap-y-5 overflow-y-auto max-w-3xs border-r border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-gray-900 dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:bg-black/10">
           <div className="relative flex h-16 shrink-0 items-center">
             <DatePicker
@@ -124,7 +143,7 @@ export default function AdminLayout({ children }) {
                 <ul role="list" className="-mx-2 mt-2 space-y-1">
                   {navigation.map((item) => (
                     <li key={item.name}>
-                      <a
+                      <Link
                         href={item.href}
                         className={classNames(
                           item.current
@@ -132,6 +151,7 @@ export default function AdminLayout({ children }) {
                             : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white",
                           "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                         )}
+                        onClick={() => setSelected(item.date + item.name)}
                       >
                         <item.icon
                           aria-hidden="true"
@@ -151,7 +171,7 @@ export default function AdminLayout({ children }) {
                             {item.count}
                           </span>
                         ) : null}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
