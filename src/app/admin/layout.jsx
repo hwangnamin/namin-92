@@ -33,8 +33,6 @@ export default function AdminLayout({ children }) {
   const [navigation, setNavagation] = useState([]);
   const [selected, setSelected] = useState(
     searchParams.get("date") && searchParams.get("name")
-      ? searchParams.get("date") + searchParams.get("name")
-      : ""
   );
   const [open, setOpen] = useState(false);
 
