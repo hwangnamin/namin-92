@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Form from "next/form";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Button,
   Dialog,
@@ -29,6 +29,7 @@ function classNames(...classes) {
 
 export default function AdminLayout({ children }) {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [navigation, setNavagation] = useState([]);
   const [selected, setSelected] = useState(
@@ -97,6 +98,26 @@ export default function AdminLayout({ children }) {
     handleClose();
   };
 
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+
+    router.push("/signin");
+
+    console.log(error);
+  };
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+
+      !data.session && router.push("/signin");
+
+      error && console.log(error);
+    };
+
+    checkSession();
+  }, [router]);
+
   useEffect(() => {
     const handleReadMeeting = async () => {
       const { data, error } = await supabase
@@ -126,7 +147,7 @@ export default function AdminLayout({ children }) {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <div className="flex">
-        <div className="relative flex grow flex-col gap-y-5 overflow-y-auto max-w-3xs border-r border-gray-200 bg-white px-6 dark:border-white/10 dark:bg-gray-900 dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:bg-black/10">
+        <div className="relative flex grow flex-col gap-y-5 overflow-y-auto max-w-3xs h-dvh border-r border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-gray-900 dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:bg-black/10">
           <div className="relative flex h-16 shrink-0 items-center">
             <DatePicker
               format="YYYY/MM/DD"
@@ -174,15 +195,18 @@ export default function AdminLayout({ children }) {
                       </Link>
                     </li>
                   ))}
+                  <li className="mt-auto text-center">
+                    <Button variant="contained" onClick={handleClickOpen}>
+                      미팅 만들기
+                    </Button>
+                  </li>
                 </ul>
-              </li>
-              <li className="-mx-6 mt-auto text-center">
-                <Button variant="contained" onClick={handleClickOpen}>
-                  미팅 만들기
-                </Button>
               </li>
             </ul>
           </nav>
+          <Button variant="contained" color="secondary" onClick={handleSignOut}>
+            로그아웃
+          </Button>
         </div>
         <main>{children}</main>
       </div>

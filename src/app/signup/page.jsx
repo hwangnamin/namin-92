@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Form from "next/form";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { supabase } from "@/utils/supabaseClient";
@@ -108,13 +109,12 @@ export default function SignUp() {
             </div>
           </Form>
           <p className="mt-10 text-center text-sm/6 text-gray-500 dark:text-gray-400">
-            Not a member?{" "}
-            <a
-              href="#"
+            <Link
+              href="/signin"
               className="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
             >
-              Start a 14 day free trial
-            </a>
+              로그인 페이지로 이동
+            </Link>
           </p>
         </div>
       </div>
