@@ -31,6 +31,7 @@ export default function AdminLayout({ children }) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const [email, setEmail] = useState("");
   const [navigation, setNavagation] = useState([]);
   const [selected, setSelected] = useState(
     searchParams.get("date") && searchParams.get("name")
@@ -98,6 +99,22 @@ export default function AdminLayout({ children }) {
     handleClose();
   };
 
+  const handleUpdateUser = async () => {
+    const password = window.prompt();
+
+    if (!password) {
+      return;
+    }
+
+    const { data, error } = await supabase.auth.updateUser({
+      password,
+    });
+
+    data.user && alert("비밀번호가 변경되었습니다.");
+
+    error && alert(error);
+  };
+
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
 
@@ -110,7 +127,13 @@ export default function AdminLayout({ children }) {
     const checkSession = async () => {
       const { data, error } = await supabase.auth.getSession();
 
-      !data.session && router.push("/signin");
+      if (!data.session) {
+        router.push("/signin");
+
+        return;
+      }
+
+      setEmail(data.session.user.email);
 
       error && console.log(error);
     };
@@ -148,6 +171,7 @@ export default function AdminLayout({ children }) {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <div className="flex">
         <div className="relative flex grow flex-col gap-y-5 overflow-y-auto max-w-3xs h-dvh border-r border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-gray-900 dark:before:pointer-events-none dark:before:absolute dark:before:inset-0 dark:before:bg-black/10">
+          {email}
           <div className="relative flex h-16 shrink-0 items-center">
             <DatePicker
               format="YYYY/MM/DD"
@@ -204,7 +228,14 @@ export default function AdminLayout({ children }) {
               </li>
             </ul>
           </nav>
-          <Button variant="contained" color="secondary" onClick={handleSignOut}>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleUpdateUser}
+          >
+            비밀번호 변경
+          </Button>
+          <Button variant="contained" color="success" onClick={handleSignOut}>
             로그아웃
           </Button>
         </div>
