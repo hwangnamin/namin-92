@@ -99,7 +99,7 @@ export default function AdminLayout({ children }) {
     handleClose();
   };
 
-  const handleUpdateUser = async () => {
+  const handleUpdatePassword = async () => {
     const password = window.prompt();
 
     if (!password) {
@@ -107,7 +107,7 @@ export default function AdminLayout({ children }) {
     }
 
     const { data, error } = await supabase.auth.updateUser({
-      password,
+      password: password.trim(),
     });
 
     data.user && alert("비밀번호가 변경되었습니다.");
@@ -228,14 +228,10 @@ export default function AdminLayout({ children }) {
               </li>
             </ul>
           </nav>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={handleUpdateUser}
-          >
+          <Button variant="outlined" onClick={handleUpdatePassword}>
             비밀번호 변경
           </Button>
-          <Button variant="contained" color="success" onClick={handleSignOut}>
+          <Button variant="outlined" onClick={handleSignOut}>
             로그아웃
           </Button>
         </div>

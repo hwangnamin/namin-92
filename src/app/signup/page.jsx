@@ -16,8 +16,8 @@ export default function SignUp() {
 
   const handleSignUp = async () => {
     const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
+      email: email.trim(),
+      password: password.trim(),
     });
 
     data.session && router.push("/admin");

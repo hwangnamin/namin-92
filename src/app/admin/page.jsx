@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { Button } from "@mui/material";
 import { PaperClipIcon } from "@heroicons/react/20/solid";
 
 import { supabase } from "@/utils/supabaseClient";
@@ -12,7 +13,54 @@ export default function Admin() {
   const date = searchParams.get("date");
   const name = searchParams.get("name");
 
+  const [flag, setFlag] = useState(false);
   const [detail, setDetail] = useState({});
+
+  const checkFlag = async () => {
+    const { data, error } = await supabase.from("meeting").select("flag");
+
+    error && console.log(error);
+
+    setFlag(data.some((item) => item.flag === true));
+  };
+
+  const readMeeting = async () => {
+    const { data, error } = await supabase
+      .from("meeting")
+      .select("*")
+      .eq("date", date)
+      .eq("name", name);
+
+    data && setDetail(data[0]);
+
+    error && console.log(error);
+  };
+
+  const handleUpdateStart = async () => {
+    const { error } = await supabase
+      .from("meeting")
+      .update({ flag: true })
+      .eq("date", date)
+      .eq("name", name);
+
+    error && console.log(error);
+
+    checkFlag();
+    readMeeting();
+  };
+
+  const handleUpdateFinish = async () => {
+    const { error } = await supabase
+      .from("meeting")
+      .update({ flag: false })
+      .eq("date", date)
+      .eq("name", name);
+
+    error && console.log(error);
+
+    checkFlag();
+    readMeeting();
+  };
 
   useEffect(() => {
     const initReadMeeting = async () => {
@@ -27,7 +75,16 @@ export default function Admin() {
       error && console.log(error);
     };
 
+    const checkFlag = async () => {
+      const { data, error } = await supabase.from("meeting").select("flag");
+
+      error && console.log(error);
+
+      setFlag(data.some((item) => item.flag === true));
+    };
+
     date && name && initReadMeeting();
+    date && name && checkFlag();
   }, [date, name]);
 
   return (
@@ -36,11 +93,28 @@ export default function Admin() {
         <>
           <div className="px-4 sm:px-0">
             <h3 className="text-base/7 font-semibold text-gray-900 dark:text-white">
-              {detail.name}
+              {detail.name}&nbsp;
+              <span className="text-red-400">{detail.flag && "진행중"}</span>
             </h3>
             <p className="mt-1 max-w-2xl text-sm/6 text-gray-500 dark:text-gray-400">
               {detail.date}
             </p>
+            <div className="flex gap-2">
+              <Button
+                color="success"
+                onClick={handleUpdateStart}
+                disabled={flag}
+              >
+                미팅 시작
+              </Button>
+              <Button
+                color="error"
+                onClick={handleUpdateFinish}
+                disabled={!detail.flag}
+              >
+                미팅 종료
+              </Button>
+            </div>
           </div>
           <div className="mt-6 border-t border-gray-100 dark:border-white/10">
             <dl className="divide-y divide-gray-100 dark:divide-white/10">
