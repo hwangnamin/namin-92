@@ -27,7 +27,7 @@ export default function Admin() {
   const readMeeting = async () => {
     const { data, error } = await supabase
       .from("meeting")
-      .select("*")
+      .select()
       .eq("date", date)
       .eq("name", name);
 
@@ -66,7 +66,7 @@ export default function Admin() {
     const initReadMeeting = async () => {
       const { data, error } = await supabase
         .from("meeting")
-        .select("*")
+        .select()
         .eq("date", date)
         .eq("name", name);
 

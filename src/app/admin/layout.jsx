@@ -60,7 +60,7 @@ export default function AdminLayout({ children }) {
   const readMeeting = async () => {
     const { data, error } = await supabase
       .from("meeting")
-      .select("*")
+      .select()
       .eq("date", date)
       .order("created_at");
 
@@ -145,7 +145,7 @@ export default function AdminLayout({ children }) {
     const handleReadMeeting = async () => {
       const { data, error } = await supabase
         .from("meeting")
-        .select("*")
+        .select()
         .eq("date", date)
         .order("created_at");
 

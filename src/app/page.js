@@ -1,10 +1,45 @@
+"use client";
+
+import { useState } from "react";
+import Form from "next/form";
+import { useRouter } from "next/navigation";
+
+import { useForm } from "@/utils/context";
+import { supabase } from "@/utils/supabaseClient";
+
 export default function Home() {
+  const router = useRouter();
+
+  const { setDate, setMeetingName } = useForm();
+
+  const [password, setPasswod] = useState("");
+
+  const handleNext = async () => {
+    const { data, error } = await supabase
+      .from("meeting")
+      .select()
+      .eq("flag", true);
+
+    if (password === data[0].password) {
+      setDate(data[0].date);
+      setMeetingName(data[0].name);
+
+      router.push("/information");
+
+      return;
+    }
+
+    alert("올바른 비밀번호를 입려해주세요");
+
+    error && console.lor(error);
+  };
+
   return (
-    <form className="p-4">
+    <Form className="p-4" action={handleNext}>
       <div className="space-y-12">
         <div className="border-b border-gray-900/10 pb-12 dark:border-white/10">
           <h2 className="text-base/7 font-semibold text-gray-900 dark:text-white">
-            Profile
+            설명
           </h2>
           <p className="mt-1 text-sm/6 text-gray-600 dark:text-gray-400">
             This information will be displayed publicly so be careful what you
@@ -13,7 +48,7 @@ export default function Home() {
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-4">
               <label
-                htmlFor="username"
+                htmlFor="password"
                 className="block text-sm/6 font-medium text-gray-900 dark:text-white"
               >
                 오늘의 비밀번호
@@ -21,11 +56,12 @@ export default function Home() {
               <div className="mt-2">
                 <div className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600 dark:bg-white/5 dark:outline-white/10 dark:focus-within:outline-indigo-500">
                   <input
-                    id="username"
-                    name="username"
+                    id="password"
+                    name="password"
                     type="text"
-                    placeholder="janesmith"
                     className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6 dark:bg-transparent dark:text-white dark:placeholder:text-gray-500"
+                    value={password}
+                    onChange={({ target }) => setPasswod(target.value)}
                   />
                 </div>
               </div>
@@ -41,6 +77,6 @@ export default function Home() {
           다음
         </button>
       </div>
-    </form>
+    </Form>
   );
 }
