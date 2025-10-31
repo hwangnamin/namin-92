@@ -17,7 +17,25 @@ export default function Information() {
   const [job, setJob] = useState("");
   const [number, setNumber] = useState("");
 
-  const handleInsertInformation = async () => {
+  const readNames = async () => {
+    const { data, error } = await supabase
+      .from("information")
+      .select("username")
+      .eq("date", date)
+      .eq("meetingName", meetingName);
+
+    error && console.log(error);
+
+    return data.some((item) => item.username === username);
+  };
+
+  const handleCreateInformation = async () => {
+    if (await readNames()) {
+      alert("이미 사용하는 닉네임입니다.");
+
+      return;
+    }
+
     const { error } = await supabase.from("information").insert({
       date,
       meetingName,
@@ -33,14 +51,14 @@ export default function Information() {
   };
 
   return (
-    <form className="p-4" action={handleInsertInformation}>
+    <form className="p-4" action={handleCreateInformation}>
       <div className="space-y-12">
         <div className="border-b border-gray-900/10 pb-12 dark:border-white/10">
           <h2 className="text-base/7 font-semibold text-gray-900 dark:text-white">
             매칭정보
           </h2>
           <p className="mt-1 text-sm/6 text-gray-600 dark:text-gray-400">
-            매칭시 상대 이성에게 보여집니다.
+            매칭 시 상대 이성에게 보여집니다.
           </p>
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-4">

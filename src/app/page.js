@@ -20,7 +20,7 @@ export default function Home() {
       .select()
       .eq("flag", true);
 
-    if (password === data[0].password) {
+    if (password === data[0]?.password) {
       setDate(data[0].date);
       setMeetingName(data[0].name);
 
